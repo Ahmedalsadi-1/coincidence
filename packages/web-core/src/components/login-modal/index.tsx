@@ -10,7 +10,6 @@ import { useTranslation } from 'react-i18next';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useAuthStoreShallow } from '@refly/stores';
 import { serverOrigin } from '@refly/ui-kit';
-import { useGetAuthConfig } from '@refly-packages/ai-workspace-common/queries';
 import { usePublicAccessPage } from '@refly-packages/ai-workspace-common/hooks/use-is-share-page';
 import { Logo } from '@refly-packages/ai-workspace-common/components/common/logo';
 import { logEvent } from '@refly/telemetry-web';
@@ -45,25 +44,14 @@ const LoginModal = (props: { visible?: boolean; from?: string }) => {
 
   const { t } = useTranslation();
 
-  const { data: authConfig, isLoading: isAuthConfigLoading } = useGetAuthConfig();
-
-  // Provide default values if config is not loaded
+  // For development, always show all authentication options
   const { isGithubEnabled, isGoogleEnabled, isEmailEnabled } = useMemo(() => {
-    // Default to showing email login if config is not available
-    if (!authConfig?.data || isAuthConfigLoading) {
-      return {
-        isGithubEnabled: false,
-        isGoogleEnabled: false,
-        isEmailEnabled: true,
-      };
-    }
-
     return {
-      isGithubEnabled: authConfig.data.some((item) => item.provider === 'github'),
-      isGoogleEnabled: authConfig.data.some((item) => item.provider === 'google'),
-      isEmailEnabled: authConfig.data.some((item) => item.provider === 'email') || true, // Always enable email as fallback
+      isGithubEnabled: true,
+      isGoogleEnabled: true,
+      isEmailEnabled: true,
     };
-  }, [authConfig?.data, isAuthConfigLoading]);
+  }, []);
 
   /**
    * 0. Get the login status from the main site. If not logged in, visit the Login page; after logging in, display the home page

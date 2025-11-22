@@ -204,15 +204,12 @@ export class PrismaFulltextSearchBackend implements FulltextSearchBackend {
       where: {
         uid: user.uid,
         deletedAt: null,
-        visibility: true,
-        OR: [
-          {
-            title: {
-              contains: req.query,
-              ...(this.database === 'postgresql' && { mode: 'insensitive' }),
-            },
+        ...(req.query && {
+          title: {
+            contains: req.query,
+            ...(this.database === 'postgresql' && { mode: 'insensitive' }),
           },
-        ],
+        }),
       },
       take: req.limit ?? 20,
       orderBy: { updatedAt: 'desc' },

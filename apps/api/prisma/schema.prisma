@@ -6,13 +6,13 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
 model Account {
   /// Primary key
-  pk                BigInt   @id @default(autoincrement())
+  pk                Int      @id @default(autoincrement())
   /// UID
   uid               String   @default("") @map("uid")
   /// Account type
@@ -27,12 +27,12 @@ model Account {
   accessToken       String?  @map("access_token")
   /// Token expiration timestamp
   expiresAt         Int?     @map("expires_at")
-  /// Scope (JSON array)
-  scope             String?  @default("[]") @map("scope")
+  /// Scope
+  scope             String?  @map("scope")
   /// Create timestamp
-  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt         DateTime @default(now()) @map("created_at")
   /// Update timestamp
-  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@unique([provider, providerAccountId])
   @@map("accounts")
@@ -40,7 +40,7 @@ model Account {
 
 model VerificationSession {
   /// Primary key
-  pk             BigInt   @id @default(autoincrement())
+  pk             Int      @id @default(autoincrement())
   /// Session id
   sessionId      String   @unique @map("session_id")
   /// Verification purpose
@@ -52,9 +52,9 @@ model VerificationSession {
   /// Hashed password
   hashedPassword String?  @map("hashed_password")
   /// Expiration timestamp
-  expiresAt      DateTime @map("expires_at") @db.Timestamptz()
+  expiresAt      DateTime @map("expires_at")
   /// Create timestamp
-  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt      DateTime @default(now()) @map("created_at")
 
   @@index([email, code])
   @@map("verification_sessions")
@@ -62,7 +62,7 @@ model VerificationSession {
 
 model User {
   /// Primary key
-  pk             BigInt    @id @default(autoincrement())
+  pk             Int       @id @default(autoincrement())
   /// UID
   uid            String    @unique @map("uid")
   /// Username
@@ -74,7 +74,7 @@ model User {
   /// Avatar url
   avatar         String?   @map("avatar")
   /// Email verified timestamp
-  emailVerified  DateTime? @map("email_verified") @db.Timestamptz()
+  emailVerified  DateTime? @map("email_verified")
   /// Password
   password       String?   @map("password")
   /// UI language setting
@@ -92,94 +92,74 @@ model User {
   /// Stripe subscription ID
   subscriptionId String?   @map("subscription_id")
   /// Create timestamp
-  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt      DateTime  @default(now()) @map("created_at")
   /// Update timestamp
-  updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at")
 
   @@map("users")
 }
 
 model ActionResult {
   /// Primary key
-  pk                      BigInt       @id @default(autoincrement())
+  pk             Int      @id @default(autoincrement())
   /// Action result id
-  resultId                String       @map("result_id")
+  resultId       String   @map("result_id")
   /// Action result version
-  version                 Int          @default(0) @map("version")
+  version        Int      @default(0) @map("version")
   /// Action type
-  type                    String       @default("skill") @map("type")
+  type           String   @default("skill") @map("type")
   /// UID
-  uid                     String       @default("") @map("uid")
+  uid            String   @default("") @map("uid")
   /// Result title
-  title                   String       @default("") @map("title")
+  title          String   @default("") @map("title")
   /// Used model tier
-  tier                    String?      @default("") @map("tier")
+  tier           String?  @default("") @map("tier")
   /// Used model
-  modelName               String?      @map("model_name")
+  modelName      String?  @map("model_name")
   /// Action target type
-  targetType              String?      @map("target_type")
+  targetType     String?  @map("target_type")
   /// Action target ID
-  targetId                String?      @map("target_id")
+  targetId       String?  @map("target_id")
   /// Action metadata
-  actionMeta              String?      @map("action_meta")
+  actionMeta     String?  @map("action_meta")
   /// Input (JSON)
-  input                   String?      @map("input")
+  input          String?  @map("input")
   /// Context (JSON of `SkillContext`)
-  context                 String?      @map("context")
+  context        String?  @map("context")
   /// Skill template config (JSON)
-  tplConfig               String?      @map("tpl_config")
+  tplConfig      String?  @map("tpl_config")
   /// Skill runtime config (JSON)
-  runtimeConfig           String?      @map("runtime_config")
+  runtimeConfig  String?  @map("runtime_config")
   /// Result history (JSON array of `ActionResult`)
-  history                 String?      @map("history")
+  history        String?  @map("history")
   /// Errors
-  errors                  String?      @map("errors")
+  errors         String?  @map("errors")
   /// Error type
-  errorType               String?      @map("error_type")
-  /// Toolsets (JSON array of `GenericToolset`)
-  toolsets                String?      @map("toolsets")
+  errorType      String?  @map("error_type")
   /// Locale setting
-  locale                  String?      @default("") @map("locale")
+  locale         String?  @default("") @map("locale")
   /// Project id
-  projectId               String?      @map("project_id")
+  projectId      String?  @map("project_id")
   /// Action result status
-  status                  ActionStatus @default(waiting) @map("status")
+  status         String   @default("waiting") @map("status")
   /// Duplicate from another action result id
-  duplicateFrom           String?      @map("duplicate_from")
+  duplicateFrom  String?  @map("duplicate_from")
   /// Provider item id
-  providerItemId          String?      @map("provider_item_id")
-  /// Pilot step id
-  pilotStepId             String?      @map("pilot_step_id")
-  /// Pilot session id
-  pilotSessionId          String?      @map("pilot_session_id")
-  /// Copilot session id
-  copilotSessionId        String?      @map("copilot_session_id")
-  /// Workflow execution id
-  workflowExecutionId     String?      @map("workflow_execution_id")
-  /// Workflow node execution id
-  workflowNodeExecutionId String?      @map("workflow_node_execution_id")
-  /// Media generation output URL
-  outputUrl               String?      @map("output_url")
-  /// Media result storage key
-  storageKey              String?      @map("storage_key")
-  /// Parent result id
-  parentResultId          String?      @map("parent_result_id")
+  providerItemId String?  @map("provider_item_id")
   /// Create timestamp
-  createdAt               DateTime     @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt      DateTime @default(now()) @map("created_at")
   /// Update timestamp
-  updatedAt               DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@unique([resultId, version])
   @@index([targetType, targetId])
-  @@index([pilotStepId])
   @@index([status, updatedAt])
-  @@index([copilotSessionId])
   @@map("action_results")
 }
 
 model ActionStep {
   /// Primary key
-  pk               BigInt    @id @default(autoincrement())
+  pk               Int       @id @default(autoincrement())
   /// Action result id which this step belongs to
   resultId         String    @map("result_id")
   /// Action result version
@@ -203,224 +183,37 @@ model ActionStep {
   /// Token usage summary (JSON array)
   tokenUsage       String    @default("[]") @map("token_usage")
   /// Create timestamp
-  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt        DateTime  @default(now()) @map("created_at")
   /// Update timestamp
-  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at")
   /// Soft delete timestamp
-  deletedAt        DateTime? @map("deleted_at") @db.Timestamptz()
+  deletedAt        DateTime? @map("deleted_at")
 
   @@index([resultId, version, order])
   @@map("action_steps")
 }
 
-model PilotSession {
-  /// Primary key
-  pk             BigInt   @id @default(autoincrement())
-  /// Session id
-  sessionId      String   @unique @map("session_id")
-  /// UID
-  uid            String   @map("uid")
-  /// Session current epoch
-  currentEpoch   Int      @default(0) @map("current_epoch")
-  /// Session max epoch
-  maxEpoch       Int      @default(2) @map("max_epoch")
-  /// Session title
-  title          String   @map("title")
-  /// Input (JSON)
-  input          String   @map("input")
-  /// Progress plan (JSON) - dynamic stage planning and execution status
-  progress       String?  @map("progress") @db.Text
-  /// Used model
-  modelName      String?  @map("model_name")
-  /// Action target type
-  targetType     String?  @map("target_type")
-  /// Action target ID
-  targetId       String?  @map("target_id")
-  /// Provider item id
-  providerItemId String?  @map("provider_item_id")
-  /// Status
-  status         String   @default("init") @map("status")
-  /// Create timestamp
-  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz()
-  /// Update timestamp
-  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
-
-  @@index([uid, createdAt])
-  @@map("pilot_sessions")
-}
-
-model PilotStep {
-  /// Primary key
-  pk         BigInt   @id @default(autoincrement())
-  /// Pilot step id
-  stepId     String   @unique @map("step_id")
-  /// Pilot session id
-  sessionId  String   @map("session_id")
-  /// Step name
-  name       String   @map("name")
-  /// Epoch
-  epoch      Int      @map("epoch")
-  /// Entity id
-  entityId   String?  @map("entity_id")
-  /// Entity type
-  entityType String?  @map("entity_type")
-  /// Status
-  status     String   @default("init") @map("status")
-  /// Raw step output from LLM
-  rawOutput  String?  @map("raw_output")
-  /// Divergent node fields
-  mode       String?  @default("subtask") @map("mode")
-  /// Create timestamp
-  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz()
-  /// Update timestamp
-  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
-
-  @@index([sessionId, createdAt])
-  @@map("pilot_steps")
-}
-
-model CopilotSession {
-  /// Primary key
-  pk        BigInt   @id @default(autoincrement())
-  /// Session id
-  sessionId String   @unique @map("session_id")
-  /// UID
-  uid       String   @map("uid")
-  /// Session title
-  title     String   @map("title")
-  /// Canvas id
-  canvasId  String   @map("canvas_id")
-  /// Create timestamp
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
-  /// Update timestamp
-  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
-
-  @@index([uid, canvasId])
-  @@map("copilot_sessions")
-}
-
-model WorkflowExecution {
-  /// Primary key
-  pk             BigInt   @id @default(autoincrement())
-  /// Workflow execution id
-  executionId    String   @unique @map("execution_id")
-  /// UID
-  uid            String   @map("uid")
-  /// Canvas id
-  canvasId       String   @map("canvas_id")
-  /// Source canvas id (from which canvas the workflow is initialized)
-  sourceCanvasId String   @default("") @map("source_canvas_id")
-  /// Workflow title
-  title          String   @map("title")
-  /// Workflow status: init, executing, finished, failed
-  status         String   @default("init") @map("status")
-  /// Whether the workflow was aborted by user
-  abortedByUser  Boolean  @default(false) @map("aborted_by_user")
-  /// Workflow app id
-  appId          String?  @map("app_id")
-  /// Workflow variables (JSON)
-  variables      String?  @map("variables")
-  /// Total nodes count
-  totalNodes     Int      @default(0) @map("total_nodes")
-  /// Executed nodes count
-  executedNodes  Int      @default(0) @map("executed_nodes")
-  /// Failed nodes count
-  failedNodes    Int      @default(0) @map("failed_nodes")
-  /// Create timestamp
-  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz()
-  /// Update timestamp
-  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
-
-  @@index([uid, canvasId])
-  @@map("workflow_executions")
-}
-
-model WorkflowNodeExecution {
-  /// Primary key
-  pk              BigInt    @id @default(autoincrement())
-  /// Node execution id
-  nodeExecutionId String    @unique @map("node_execution_id")
-  /// Workflow execution id
-  executionId     String    @map("execution_id")
-  /// Canvas id
-  canvasId        String    @default("") @map("canvas_id")
-  /// Canvas node id
-  nodeId          String    @map("node_id")
-  /// Node type
-  nodeType        String    @map("node_type")
-  /// Node data (JSON of `CanvasNode`)
-  nodeData        String    @default("{}") @map("node_data")
-  /// Node entity id
-  entityId        String    @map("entity_id")
-  /// Node title
-  title           String    @map("title")
-  /// Original query
-  originalQuery   String?   @map("original_query")
-  /// Processed query
-  processedQuery  String?   @map("processed_query")
-  /// Node status (waiting, executing, finish, failed)
-  status          String    @default("waiting") @map("status")
-  /// Execution progress (0-100)
-  progress        Int       @default(0) @map("progress")
-  /// Connect to filters (JSON array)
-  connectTo       String    @default("[]") @map("connect_to")
-  /// Result history (JSON array of `ActionResult`)
-  resultHistory   String?   @map("result_history")
-  /// Parent node ids (JSON array)
-  parentNodeIds   String    @default("[]") @map("parent_node_ids")
-  /// Child node ids (JSON array)
-  childNodeIds    String    @default("[]") @map("child_node_ids")
-  /// Execution start time
-  startTime       DateTime? @map("start_time") @db.Timestamptz()
-  /// Execution end time
-  endTime         DateTime? @map("end_time") @db.Timestamptz()
-  /// Error message if failed
-  errorMessage    String?   @map("error_message")
-  /// Create timestamp
-  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
-  /// Update timestamp
-  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
-
-  @@index([executionId, nodeId])
-  @@index([executionId, status])
-  @@map("workflow_node_executions")
-}
-
-enum ActionStatus {
-  init
-  waiting
-  executing
-  finish
-  failed
-}
-
-// Publish review status will be stored as String for extensibility
-
 model TokenUsage {
   /// Primary key
-  pk             BigInt   @id @default(autoincrement())
+  pk            Int      @id @default(autoincrement())
   /// UID
-  uid            String   @map("uid")
+  uid           String   @map("uid")
   /// Action result id
-  resultId       String?  @map("result_id")
+  resultId      String?  @map("result_id")
   /// Model tier
-  tier           String   @map("tier")
+  tier          String   @map("tier")
   /// Model provider
-  modelProvider  String   @default("") @map("model_provider")
+  modelProvider String   @map("model_provider")
   /// Model name
-  modelName      String   @default("") @map("model_name")
-  /// Model label
-  modelLabel     String   @default("") @map("model_label")
-  /// Provider item id
-  providerItemId String?  @map("provider_item_id")
+  modelName     String   @map("model_name")
   /// Input tokens
-  inputTokens    Int      @default(0) @map("input_tokens")
+  inputTokens   Int      @default(0) @map("input_tokens")
   /// Output tokens
-  outputTokens   Int      @default(0) @map("output_tokens")
+  outputTokens  Int      @default(0) @map("output_tokens")
   /// Create timestamp
-  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt     DateTime @default(now()) @map("created_at")
   /// Update timestamp
-  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@index([uid, createdAt])
   @@map("token_usages")
@@ -428,7 +221,7 @@ model TokenUsage {
 
 model StaticFile {
   /// Primary key
-  pk                BigInt    @id @default(autoincrement())
+  pk                Int       @id @default(autoincrement())
   /// UID
   uid               String    @map("uid")
   /// Storage key
@@ -446,13 +239,13 @@ model StaticFile {
   /// Visibility
   visibility        String    @default("private") @map("visibility")
   /// Expiration timestamp
-  expiredAt         DateTime? @map("expired_at") @db.Timestamptz()
+  expiredAt         DateTime? @map("expired_at")
   /// Create timestamp
-  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt         DateTime  @default(now()) @map("created_at")
   /// Update timestamp
-  updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at")
   /// Soft delete timestamp
-  deletedAt         DateTime? @map("deleted_at") @db.Timestamptz()
+  deletedAt         DateTime? @map("deleted_at")
 
   @@index([entityId, entityType])
   @@index([storageKey])
@@ -461,113 +254,75 @@ model StaticFile {
 
 model Canvas {
   /// Primary key
-  pk                BigInt         @id @default(autoincrement())
+  pk                Int       @id @default(autoincrement())
   /// Canvas id
-  canvasId          String         @unique @map("canvas_id")
+  canvasId          String    @unique @map("canvas_id")
   /// Owner UID
-  uid               String         @map("uid")
+  uid               String    @map("uid")
   /// Canvas title
-  title             String         @default("Untitled") @map("title")
+  title             String    @default("Untitled") @map("title")
   /// Canvas yjs doc storage size (in bytes)
-  storageSize       BigInt         @default(0) @map("storage_size")
-  /// Canvas version
-  version           String         @default("") @map("version")
-  /// Canvas yjs doc storage key (deprecated, canvas state will be stored in `CanvasVersion`)
-  stateStorageKey   String?        @map("state_storage_key")
+  storageSize       BigInt    @default(0) @map("storage_size")
+  /// Canvas yjs doc storage key
+  stateStorageKey   String?   @map("state_storage_key")
   /// Minimap storage key
-  minimapStorageKey String?        @map("minimap_storage_key")
-  /// Used toolsets (JSON array of `GenericToolset`)
-  usedToolsets      String?        @map("used_toolsets")
+  minimapStorageKey String?   @map("minimap_storage_key")
   /// Whether this canvas is readonly
-  readOnly          Boolean        @default(false) @map("read_only")
+  readOnly          Boolean   @default(false) @map("read_only")
   /// Whether this canvas is public
-  isPublic          Boolean        @default(false) @map("is_public")
+  isPublic          Boolean   @default(false) @map("is_public")
   /// Canvas status
-  status            String         @default("ready") @map("status")
-  /// Whether this canvas is visible in lists
-  visibility        Boolean        @default(true) @map("visibility")
+  status            String    @default("ready") @map("status")
   /// Create timestamp
-  createdAt         DateTime       @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt         DateTime  @default(now()) @map("created_at")
   /// Update timestamp
-  updatedAt         DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at")
   /// Soft delete timestamp
-  deletedAt         DateTime?      @map("deleted_at") @db.Timestamptz()
+  deletedAt         DateTime? @map("deleted_at")
   /// Project id
-  projectId         String?        @map("project_id")
+  projectId         String?   @map("project_id")
   /// Project
-  project           Project?       @relation(fields: [projectId], references: [projectId])
-  Resource          Resource[]
-  Document          Document[]
-  CodeArtifact      CodeArtifact[]
-  /// Workflow configuration (JSON)
-  workflow          String?        @map("workflow")
+  project           Project?  @relation(fields: [projectId], references: [projectId])
 
   @@index([uid, updatedAt])
-  @@index([uid, visibility, updatedAt])
   @@map("canvases")
-}
-
-model CanvasVersion {
-  /// Primary key
-  pk              BigInt    @id @default(autoincrement())
-  /// Canvas id
-  canvasId        String    @map("canvas_id")
-  /// Version
-  version         String    @map("version")
-  /// Canvas state hash
-  hash            String    @map("hash")
-  /// Canvas state storage key
-  stateStorageKey String    @map("state_storage_key")
-  /// Create timestamp
-  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
-  /// Update timestamp
-  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
-  /// Soft delete timestamp
-  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz()
-
-  @@index([canvasId, version])
-  @@map("canvas_versions")
 }
 
 model CanvasTemplate {
   /// Primary key
-  pk              BigInt    @id @default(autoincrement())
+  pk             Int                     @id @default(autoincrement())
   /// Canvas template id
-  templateId      String    @unique @map("template_id")
+  templateId     String                  @unique @map("template_id")
   /// Origin canvas id (deprecated)
-  originCanvasId  String    @default("") @map("origin_canvas_id")
-  /// Category id (deprecated, use categories relation instead)
-  categoryId      String?   @map("category_id")
-  /// Workflow app id
-  appId           String?   @map("app_id")
+  originCanvasId String                  @default("") @map("origin_canvas_id")
+  /// Category id
+  categoryId     String?                 @map("category_id")
   /// Share id
-  shareId         String    @default("") @map("share_id")
-  /// Credit usage for running this workflow app
-  creditUsage     Int?      @map("credit_usage")
-  /// Cover image storage key
-  coverStorageKey String?   @map("cover_storage_key")
+  shareId        String                  @default("") @map("share_id")
   /// Version
-  version         Int       @default(0) @map("version")
+  version        Int                     @default(0) @map("version")
   /// UID
-  uid             String    @map("uid")
+  uid            String                  @map("uid")
   /// Share user (JSON of `ShareUser`)
-  shareUser       String    @map("share_user")
+  shareUser      String                  @map("share_user")
   /// Canvas template title
-  title           String    @map("title")
+  title          String                  @map("title")
   /// Canvas template description
-  description     String    @map("description")
+  description    String                  @map("description")
   /// Whether this canvas template is public
-  isPublic        Boolean   @default(false) @map("is_public")
+  isPublic       Boolean                 @default(false) @map("is_public")
   /// Priority
-  priority        Int       @default(0) @map("priority")
+  priority       Int                     @default(0) @map("priority")
   /// Language code
-  language        String    @map("language")
+  language       String                  @map("language")
   /// Create timestamp
-  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt      DateTime                @default(now()) @map("created_at")
   /// Update timestamp
-  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt      DateTime                @default(now()) @updatedAt @map("updated_at")
   /// Soft delete timestamp
-  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz()
+  deletedAt      DateTime?               @map("deleted_at")
+  /// Category
+  category       CanvasTemplateCategory? @relation(fields: [categoryId], references: [categoryId])
 
   @@index([uid, updatedAt])
   @@index([isPublic, priority])
@@ -576,48 +331,30 @@ model CanvasTemplate {
 
 model CanvasTemplateCategory {
   /// Primary key
-  pk              BigInt    @id @default(autoincrement())
+  pk              Int              @id @default(autoincrement())
   /// Category id
-  categoryId      String    @unique @map("category_id")
+  categoryId      String           @unique @map("category_id")
   /// Category name
-  name            String    @map("name")
+  name            String           @map("name")
   /// Label dictionary (JSON)
-  labelDict       String    @map("label_dict")
+  labelDict       String           @map("label_dict")
   /// Description dictionary (JSON)
-  descriptionDict String    @map("description_dict")
+  descriptionDict String           @map("description_dict")
   /// Create timestamp
-  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt       DateTime         @default(now()) @map("created_at")
   /// Update timestamp
-  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt       DateTime         @default(now()) @updatedAt @map("updated_at")
   /// Soft delete timestamp
-  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz()
+  deletedAt       DateTime?        @map("deleted_at")
+  /// Templates
+  templates       CanvasTemplate[]
 
   @@map("canvas_template_categories")
 }
 
-model CanvasTemplateCategoryRelation {
-  /// Primary key
-  pk         BigInt    @id @default(autoincrement())
-  /// Template id
-  templateId String    @map("template_id")
-  /// Category id
-  categoryId String    @map("category_id")
-  /// Create timestamp
-  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz()
-  /// Update timestamp
-  updatedAt  DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
-  /// Soft delete timestamp
-  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz()
-
-  @@unique([templateId, categoryId])
-  @@index([templateId, deletedAt])
-  @@index([categoryId, deletedAt])
-  @@map("canvas_template_category_relations")
-}
-
 model CanvasEntityRelation {
   /// Primary key
-  pk         BigInt    @id @default(autoincrement())
+  pk         Int       @id @default(autoincrement())
   /// Canvas id
   canvasId   String    @map("canvas_id")
   /// Entity id
@@ -627,9 +364,9 @@ model CanvasEntityRelation {
   /// Whether the canvas is public
   isPublic   Boolean   @default(false) @map("is_public")
   /// Create timestamp
-  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt  DateTime  @default(now()) @map("created_at")
   /// Soft delete timestamp
-  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz()
+  deletedAt  DateTime? @map("deleted_at")
 
   @@index([canvasId, deletedAt])
   @@index([entityType, entityId, deletedAt])
@@ -638,7 +375,7 @@ model CanvasEntityRelation {
 
 model FileParseRecord {
   /// Primary key
-  pk          BigInt   @id @default(autoincrement())
+  pk          Int      @id @default(autoincrement())
   /// Resource id
   resourceId  String   @map("resource_id")
   /// UID
@@ -652,9 +389,9 @@ model FileParseRecord {
   /// Storage key
   storageKey  String   @map("storage_key")
   /// Create timestamp
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt   DateTime @default(now()) @map("created_at")
   /// Update timestamp
-  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@index([uid, createdAt])
   @@map("file_parse_records")
@@ -662,7 +399,7 @@ model FileParseRecord {
 
 model Resource {
   /// Primary key
-  pk             BigInt    @id @default(autoincrement())
+  pk             Int       @id @default(autoincrement())
   /// Resource id
   resourceId     String    @unique @map("resource_id")
   /// Resource type
@@ -673,10 +410,6 @@ model Resource {
   wordCount      Int       @default(0) @map("word_count")
   /// Content preview
   contentPreview String?   @map("content_preview")
-  /// Canvas id
-  canvasId       String?   @map("canvas_id")
-  /// Canvas
-  canvas         Canvas?   @relation(fields: [canvasId], references: [canvasId])
   /// Content storage key
   storageKey     String?   @map("storage_key")
   /// Content storage size (in bytes)
@@ -696,11 +429,11 @@ model Resource {
   /// Resource metadata
   meta           String    @map("meta")
   /// Create timestamp
-  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt      DateTime  @default(now()) @map("created_at")
   /// Update timestamp
-  updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at")
   /// Soft delete timestamp
-  deletedAt      DateTime? @map("deleted_at") @db.Timestamptz()
+  deletedAt      DateTime? @map("deleted_at")
   /// Project id
   projectId      String?   @map("project_id")
   /// Project
@@ -712,7 +445,7 @@ model Resource {
 
 model Document {
   /// Primary key
-  pk              BigInt    @id @default(autoincrement())
+  pk              Int       @id @default(autoincrement())
   /// Document id
   docId           String    @unique @map("doc_id")
   /// Owner UID
@@ -734,15 +467,11 @@ model Document {
   /// Whether this document is readonly
   readOnly        Boolean   @default(false) @map("read_only")
   /// Create timestamp
-  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt       DateTime  @default(now()) @map("created_at")
   /// Update timestamp
-  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at")
   /// Soft delete timestamp
-  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz()
-  /// Canvas id
-  canvasId        String?   @map("canvas_id")
-  /// Canvas
-  canvas          Canvas?   @relation(fields: [canvasId], references: [canvasId])
+  deletedAt       DateTime? @map("deleted_at")
   /// Project id
   projectId       String?   @map("project_id")
   /// Project
@@ -754,7 +483,7 @@ model Document {
 
 model CodeArtifact {
   /// Primary key
-  pk                BigInt    @id @default(autoincrement())
+  pk                Int       @id @default(autoincrement())
   /// Code artifact id
   artifactId        String    @unique @map("artifact_id")
   /// UID
@@ -769,69 +498,19 @@ model CodeArtifact {
   storageKey        String    @map("storage_key")
   /// Preview storage key
   previewStorageKey String?   @map("preview_storage_key")
-  /// Action result id
-  resultId          String?   @map("result_id")
-  /// Action result version
-  resultVersion     Int       @default(0) @map("result_version")
-  /// Canvas id
-  canvasId          String?   @map("canvas_id")
-  /// Canvas
-  canvas            Canvas?   @relation(fields: [canvasId], references: [canvasId])
   /// Create timestamp
-  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt         DateTime  @default(now()) @map("created_at")
   /// Update timestamp
-  updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at")
   /// Soft delete timestamp
-  deletedAt         DateTime? @map("deleted_at") @db.Timestamptz()
+  deletedAt         DateTime? @map("deleted_at")
 
   @@map("code_artifacts")
 }
 
-model DriveFile {
-  /// Primary key
-  pk            BigInt    @id @default(autoincrement())
-  /// Drive file id
-  fileId        String    @unique @map("file_id")
-  /// UID
-  uid           String    @map("uid")
-  /// Canvas id
-  canvasId      String    @map("canvas_id")
-  /// Drive file name
-  name          String    @map("name")
-  /// Drive file type (MIME type)
-  type          String    @map("type")
-  /// Drive file category
-  category      String    @map("category")
-  /// Drive file size
-  size          BigInt    @default(0) @map("size")
-  /// Drive file source
-  source        String    @default("manual") @map("source")
-  /// Drive file scope
-  scope         String    @default("present") @map("scope")
-  /// Storage key for this file
-  storageKey    String?   @map("storage_key")
-  /// Drive file summary
-  summary       String?   @map("summary")
-  /// Related variable id (when source is 'variable')
-  variableId    String?   @map("variable_id")
-  /// Action result id (when source is 'agent')
-  resultId      String?   @map("result_id")
-  /// Action result version (when source is 'agent')
-  resultVersion Int?      @map("result_version")
-  /// Drive file create timestamp
-  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz()
-  /// Update timestamp
-  updatedAt     DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
-  /// Soft delete timestamp
-  deletedAt     DateTime? @map("deleted_at") @db.Timestamptz()
-
-  @@index([canvasId, deletedAt, updatedAt])
-  @@map("drive_files")
-}
-
 model Project {
   /// Primary key
-  pk                 BigInt     @id @default(autoincrement())
+  pk                 Int        @id @default(autoincrement())
   /// Project id
   projectId          String     @unique @map("project_id")
   /// Project name
@@ -845,11 +524,11 @@ model Project {
   /// Custom instructions
   customInstructions String?    @map("custom_instructions")
   /// Create timestamp
-  createdAt          DateTime   @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt          DateTime   @default(now()) @map("created_at")
   /// Update timestamp
-  updatedAt          DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt          DateTime   @default(now()) @updatedAt @map("updated_at")
   /// Soft delete timestamp
-  deletedAt          DateTime?  @map("deleted_at") @db.Timestamptz()
+  deletedAt          DateTime?  @map("deleted_at")
   /// Documents
   documents          Document[]
   /// Resources
@@ -861,61 +540,9 @@ model Project {
   @@map("projects")
 }
 
-model WorkflowApp {
-  /// Primary key
-  pk                  BigInt    @id @default(autoincrement())
-  /// Workflow app id
-  appId               String    @unique @map("app_id")
-  /// UID
-  uid                 String    @map("uid")
-  /// Title
-  title               String    @default("") @map("title")
-  /// Description
-  description         String?   @map("description")
-  /// Query
-  query               String?   @map("query")
-  /// Variables
-  variables           String?   @map("variables")
-  /// Canvas id
-  canvasId            String?   @map("canvas_id")
-  /// Storage key
-  storageKey          String?   @map("storage_key")
-  /// Share id for public access
-  shareId             String?   @map("share_id")
-  /// Template share id for community publishing (independent from shareId)
-  templateShareId     String?   @map("template_share_id")
-  /// Cover image storage key
-  coverStorageKey     String?   @map("cover_storage_key")
-  /// Template content for app publishing
-  templateContent     String?   @map("template_content")
-  /// Whether remix is enabled for this app
-  remixEnabled        Boolean   @default(false) @map("remix_enabled")
-  /// Whether to publish this app to the community
-  publishToCommunity  Boolean   @default(false) @map("publish_to_community")
-  /// Community publish review status
-  publishReviewStatus String    @default("init") @map("publish_review_status")
-  /// Review remarks/notes from admin
-  remarks             String?   @map("remarks")
-  /// Result node IDs
-  resultNodeIds       String[]  @default([]) @map("result_node_ids")
-  /// Credit usage for running this workflow app
-  creditUsage         Int?      @map("credit_usage")
-  /// Create timestamp
-  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz()
-  /// Update timestamp
-  updatedAt           DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
-  /// Soft delete timestamp
-  deletedAt           DateTime? @map("deleted_at") @db.Timestamptz()
-
-  @@index([canvasId, deletedAt])
-  @@index([shareId])
-  @@index([templateShareId])
-  @@map("workflow_apps")
-}
-
 model ShareRecord {
   /// Primary key
-  pk               BigInt    @id @default(autoincrement())
+  pk               Int       @id @default(autoincrement())
   /// Share record id
   shareId          String    @unique @map("share_id")
   /// Title
@@ -937,11 +564,11 @@ model ShareRecord {
   /// Canvas template id
   templateId       String?   @map("template_id")
   /// Create timestamp
-  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt        DateTime  @default(now()) @map("created_at")
   /// Update timestamp
-  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at")
   /// Soft delete timestamp
-  deletedAt        DateTime? @map("deleted_at") @db.Timestamptz()
+  deletedAt        DateTime? @map("deleted_at")
 
   @@index([entityType, entityId, deletedAt])
   @@map("share_records")
@@ -949,7 +576,7 @@ model ShareRecord {
 
 model DuplicateRecord {
   /// Primary key
-  pk         BigInt    @id @default(autoincrement())
+  pk         Int       @id @default(autoincrement())
   /// Source entity ID
   sourceId   String    @map("source_id")
   /// Target entity ID
@@ -963,11 +590,11 @@ model DuplicateRecord {
   /// Status (pending, finish, failed)
   status     String    @default("pending") @map("status")
   /// Create timestamp
-  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt  DateTime  @default(now()) @map("created_at")
   /// Update timestamp
-  updatedAt  DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt  DateTime  @default(now()) @updatedAt @map("updated_at")
   /// Soft delete timestamp
-  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz()
+  deletedAt  DateTime? @map("deleted_at")
 
   @@unique([sourceId, targetId])
   @@index([targetId])
@@ -975,10 +602,38 @@ model DuplicateRecord {
   @@map("duplicate_records")
 }
 
+model Reference {
+  /// Primary key
+  pk          Int       @id @default(autoincrement())
+  /// Reference ID
+  referenceId String    @unique @map("reference_id")
+  /// Source entity type (e.g., "canvas" or "resource")
+  sourceType  String    @map("source_type")
+  /// Source entity ID
+  sourceId    String    @map("source_id")
+  /// Target entity type (e.g., "canvas" or "resource")
+  targetType  String    @map("target_type")
+  /// Target entity ID
+  targetId    String    @map("target_id")
+  /// UID of the user who created the reference
+  uid         String    @map("uid")
+  /// Create timestamp
+  createdAt   DateTime  @default(now()) @map("created_at")
+  /// Update timestamp
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at")
+  /// Soft delete timestamp
+  deletedAt   DateTime? @map("deleted_at")
+
+  @@unique([sourceType, sourceId, targetType, targetId])
+  @@index([sourceType, sourceId])
+  @@index([targetType, targetId])
+  @@map("references")
+}
+
 /// User-defined skills.
 model SkillInstance {
   /// Primary key
-  pk               BigInt    @id @default(autoincrement())
+  pk               Int       @id @default(autoincrement())
   /// Skill id
   skillId          String    @unique @map("skill_id")
   /// Skill template name
@@ -998,13 +653,13 @@ model SkillInstance {
   /// Skill template config (JSON)
   tplConfig        String?   @map("tpl_config")
   /// Whether this skill is pinned
-  pinnedAt         DateTime? @map("pinned_at") @db.Timestamptz()
+  pinnedAt         DateTime? @map("pinned_at")
   /// Create timestamp
-  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt        DateTime  @default(now()) @map("created_at")
   /// Update timestamp
-  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at")
   /// Deletion timestamp
-  deletedAt        DateTime? @map("deleted_at") @db.Timestamptz()
+  deletedAt        DateTime? @map("deleted_at")
 
   @@index([uid, updatedAt])
   @@map("skill_instances")
@@ -1012,7 +667,7 @@ model SkillInstance {
 
 model SkillTrigger {
   /// Primary key
-  pk              BigInt    @id @default(autoincrement())
+  pk              Int       @id @default(autoincrement())
   /// Trigger display name
   displayName     String    @default("") @map("display_name")
   /// Trigger id
@@ -1038,11 +693,11 @@ model SkillTrigger {
   /// Bull job id (for timer trigger)
   bullJobId       String?   @map("bull_job_id")
   /// Create timestamp
-  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt       DateTime  @default(now()) @map("created_at")
   /// Update timestamp
-  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at")
   /// Deletion timestamp
-  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz()
+  deletedAt       DateTime? @map("deleted_at")
 
   @@index([skillId, deletedAt])
   @@map("skill_triggers")
@@ -1050,7 +705,7 @@ model SkillTrigger {
 
 model LabelClass {
   /// Primary key
-  pk           BigInt          @id @default(autoincrement())
+  pk           Int             @id @default(autoincrement())
   /// Label class ID
   labelClassId String          @unique @map("label_class_id")
   /// UID
@@ -1064,11 +719,11 @@ model LabelClass {
   /// Label creation instruction prompt
   prompt       String          @map("prompt")
   /// Create timestamp
-  createdAt    DateTime        @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt    DateTime        @default(now()) @map("created_at")
   /// Update timestamp
-  updatedAt    DateTime        @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt    DateTime        @default(now()) @updatedAt @map("updated_at")
   /// Deletion timestamp
-  deletedAt    DateTime?       @map("deleted_at") @db.Timestamptz()
+  deletedAt    DateTime?       @map("deleted_at")
   /// Related labels
   labels       LabelInstance[]
 
@@ -1079,7 +734,7 @@ model LabelClass {
 
 model LabelInstance {
   /// Primary key
-  pk           BigInt     @id @default(autoincrement())
+  pk           Int        @id @default(autoincrement())
   /// Label ID
   labelId      String     @unique @map("label_id")
   /// Label class
@@ -1095,11 +750,11 @@ model LabelInstance {
   /// UID
   uid          String     @map("uid")
   /// Create timestamp
-  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt    DateTime   @default(now()) @map("created_at")
   /// Update timestamp
-  updatedAt    DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt    DateTime   @default(now()) @updatedAt @map("updated_at")
   /// Deletion timestamp
-  deletedAt    DateTime?  @map("deleted_at") @db.Timestamptz()
+  deletedAt    DateTime?  @map("deleted_at")
 
   @@index([entityType, entityId])
   @@map("label_instances")
@@ -1124,16 +779,14 @@ model Provider {
   apiKey      String?        @map("api_key")
   /// Provider base URL
   baseUrl     String?        @map("base_url")
-  /// Extra parameters (JSON)
-  extraParams String?        @map("extra_params")
   /// Whether the provider is enabled
   enabled     Boolean        @default(true) @map("enabled")
   /// Create timestamp
-  createdAt   DateTime       @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt   DateTime       @default(now()) @map("created_at")
   /// Update timestamp
-  updatedAt   DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt   DateTime       @default(now()) @updatedAt @map("updated_at")
   /// Deletion timestamp
-  deletedAt   DateTime?      @map("deleted_at") @db.Timestamptz()
+  deletedAt   DateTime?      @map("deleted_at")
   /// Model items
   items       ProviderItem[]
 
@@ -1155,70 +808,65 @@ model ProviderItem {
   name          String    @map("name")
   /// UID
   uid           String?   @map("uid")
-  /// Whether the model item is enabled
+  /// Whether to model item is enabled
   enabled       Boolean   @default(true) @map("enabled")
   /// Provider item config (JSON)
   config        String?   @map("config")
   /// Provider item billing tier
   tier          String?   @map("tier")
-  /// Credit billing configuration (JSON)
-  creditBilling String?   @map("credit_billing")
   /// Order
   order         Int       @default(0) @map("order")
   /// Group name
   groupName     String    @default("") @map("group_name")
-  /// Related global provider item ID
+  /// Credit billing configuration (JSON)
+  creditBilling String?   @map("credit_billing")
+  /// Global provider item ID reference
   globalItemId  String?   @map("global_item_id")
   /// Create timestamp
-  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt     DateTime  @default(now()) @map("created_at")
   /// Update timestamp
-  updatedAt     DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt     DateTime  @default(now()) @updatedAt @map("updated_at")
   /// Deletion timestamp
-  deletedAt     DateTime? @map("deleted_at") @db.Timestamptz()
+  deletedAt     DateTime? @map("deleted_at")
   /// Provider
   provider      Provider  @relation(fields: [providerId], references: [providerId])
 
   @@index([providerId])
   @@index([uid, deletedAt])
-  @@index([globalItemId])
   @@map("provider_items")
 }
 
 model SubscriptionPlan {
   /// Primary key
-  pk                   BigInt   @id @default(autoincrement())
+  pk                 Int      @id @default(autoincrement())
   /// Subscription plan type
-  planType             String   @map("plan_type")
+  planType           String   @map("plan_type")
   /// Billing interval (monthly, yearly, etc.)
-  interval             String?  @map("interval")
+  interval           String?  @map("interval")
   /// Lookup key
-  lookupKey            String   @map("lookup_key")
-  /// Credit quota
-  creditQuota          Int      @default(0) @map("credit_quota")
-  /// Daily gift credit quota
-  dailyGiftCreditQuota Int      @default(0) @map("daily_gift_credit_quota")
+  lookupKey          String   @map("lookup_key")
   /// Request count quota (T1)
-  t1CountQuota         Int      @default(0) @map("t1_count_quota")
+  t1CountQuota       Int      @default(0) @map("t1_count_quota")
   /// Request count quota (T2)
-  t2CountQuota         Int      @default(0) @map("t2_count_quota")
+  t2CountQuota       Int      @default(0) @map("t2_count_quota")
   /// Token quota per month (T1) (Deprecated)
-  t1TokenQuota         Int      @default(0) @map("t1_token_quota")
+  t1TokenQuota       Int      @default(0) @map("t1_token_quota")
   /// Token quota per month (T2) (Deprecated)
-  t2TokenQuota         Int      @default(1000000) @map("t2_token_quota")
+  t2TokenQuota       Int      @default(1000000) @map("t2_token_quota")
   /// File count quota
-  fileCountQuota       Int      @default(10) @map("file_count_quota")
+  fileCountQuota     Int      @default(10) @map("file_count_quota")
   /// Object storage quota (in bytes), including resource, canvas and static files
-  objectStorageQuota   BigInt   @default(1000000000) @map("object_storage_quota")
+  objectStorageQuota BigInt   @default(1000000000) @map("object_storage_quota")
   /// Vector storage quota (in bytes)
-  vectorStorageQuota   BigInt   @default(1000000000) @map("vector_storage_quota")
+  vectorStorageQuota BigInt   @default(1000000000) @map("vector_storage_quota")
   /// File parse limit (in pages)
-  fileParsePageLimit   Int      @default(-1) @map("file_parse_page_limit")
+  fileParsePageLimit Int      @default(-1) @map("file_parse_page_limit")
   /// File upload limit (in MB)
-  fileUploadLimit      Int      @default(-1) @map("file_upload_limit")
+  fileUploadLimit    Int      @default(-1) @map("file_upload_limit")
   /// Create timestamp
-  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt          DateTime @default(now()) @map("created_at")
   /// Update timestamp
-  updatedAt            DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt          DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@unique([planType, interval])
   @@map("subscription_plans")
@@ -1226,7 +874,7 @@ model SubscriptionPlan {
 
 model Subscription {
   /// Primary key
-  pk             BigInt    @id @default(autoincrement())
+  pk             Int       @id @default(autoincrement())
   /// Stripe subscription ID
   subscriptionId String    @unique @map("subscription_id")
   /// Stripe price lookup key
@@ -1244,11 +892,11 @@ model Subscription {
   /// Override plan quota (JSON string)
   overridePlan   String?   @map("override_plan")
   /// Cancel timestamp
-  cancelAt       DateTime? @map("cancel_at") @db.Timestamptz()
+  cancelAt       DateTime? @map("cancel_at")
   /// Create timestamp
-  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt      DateTime  @default(now()) @map("created_at")
   /// Update timestamp
-  updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at")
 
   @@index([uid])
   @@index([status, cancelAt])
@@ -1257,7 +905,7 @@ model Subscription {
 
 model TokenUsageMeter {
   /// Primary key
-  pk             BigInt    @id @default(autoincrement())
+  pk             Int       @id @default(autoincrement())
   /// Meter ID
   meterId        String    @unique @map("meter_id")
   /// UID
@@ -1265,9 +913,9 @@ model TokenUsageMeter {
   /// Subscription ID
   subscriptionId String?   @map("subscription_id")
   /// Meter start timestamp
-  startAt        DateTime  @map("start_at") @db.Timestamptz()
+  startAt        DateTime  @map("start_at")
   /// Meter end timestamp
-  endAt          DateTime? @map("end_at") @db.Timestamptz()
+  endAt          DateTime? @map("end_at")
   /// Request count quota (T1)
   t1CountQuota   Int       @default(0) @map("t1_count_quota")
   /// Request count used (T1)
@@ -1285,143 +933,19 @@ model TokenUsageMeter {
   /// Token used (T2)
   t2TokenUsed    Int       @default(0) @map("t2_token_used")
   /// Create timestamp
-  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt      DateTime  @default(now()) @map("created_at")
   /// Update timestamp
-  updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at")
   /// Deletion timestamp
-  deletedAt      DateTime? @map("deleted_at") @db.Timestamptz()
+  deletedAt      DateTime? @map("deleted_at")
 
   @@index([uid, deletedAt])
   @@map("token_usage_meters")
 }
 
-model CreditRecharge {
-  /// Primary key
-  pk          BigInt   @id @default(autoincrement())
-  /// Recharge record ID
-  rechargeId  String   @unique @map("recharge_id")
-  /// User UID
-  uid         String   @map("uid")
-  /// Recharge amount (in credits)
-  amount      Int      @map("amount")
-  /// Remaining balance for this recharge record
-  balance     Int      @map("balance")
-  /// Whether this recharge record is enabled (false after 30 days)
-  enabled     Boolean  @default(true) @map("enabled")
-  /// Recharge source (purchase, gift, promotion, etc.)
-  source      String   @default("purchase") @map("source")
-  /// Recharge description
-  description String?  @map("description")
-  /// App Id
-  appId       String?  @map("app_id")
-  /// Extra data (JSON)
-  extraData   String?  @map("extra_data")
-  /// Expiration timestamp (30 days from creation)
-  expiresAt   DateTime @map("expires_at") @db.Timestamptz()
-  /// Create timestamp
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
-  /// Update timestamp
-  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
-
-  @@index([uid, createdAt])
-  @@index([uid, enabled, createdAt])
-  @@index([expiresAt, enabled])
-  @@map("credit_recharges")
-}
-
-model CreditDebt {
-  /// Primary key
-  pk          BigInt   @id @default(autoincrement())
-  /// Debt record ID
-  debtId      String   @unique @map("debt_id")
-  /// User UID
-  uid         String   @map("uid")
-  /// Debt amount (in credits)
-  amount      Int      @map("amount")
-  /// Remaining debt balance
-  balance     Int      @map("balance")
-  /// Whether this debt record is active
-  enabled     Boolean  @default(true) @map("enabled")
-  /// Debt source (usage_overdraft, etc.)
-  source      String   @default("usage_overdraft") @map("source")
-  /// Debt description
-  description String?  @map("description")
-  /// Create timestamp
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
-  /// Update timestamp
-  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
-
-  @@index([uid, enabled, createdAt])
-  @@map("credit_debts")
-}
-
-model CreditUsage {
-  /// Primary key
-  pk                BigInt   @id @default(autoincrement())
-  /// Usage record ID
-  usageId           String   @unique @map("usage_id")
-  /// User UID
-  uid               String   @map("uid")
-  /// Used credits amount
-  amount            Int      @map("amount")
-  /// Expected used credits amount
-  dueAmount         Int      @default(0) @map("due_amount")
-  /// Provider item ID that consumed the credits
-  providerItemId    String?  @map("provider_item_id")
-  /// Model name used
-  modelName         String?  @map("model_name")
-  /// Usage type (model_call, media_generation, etc.)
-  usageType         String   @default("model_call") @map("usage_type")
-  /// Related action result ID (if applicable)
-  actionResultId    String?  @map("action_result_id")
-  /// Action result version
-  version           Int?     @map("version")
-  /// Related pilot session ID (if applicable)
-  pilotSessionId    String?  @map("pilot_session_id")
-  /// Usage description
-  description       String?  @map("description")
-  /// App Id
-  appId             String?  @map("app_id")
-  /// Extra data (JSON)
-  extraData         String?  @map("extra_data")
-  /// Model usage details for skill execution (JSON array of model usage)
-  modelUsageDetails String?  @map("model_usage_details")
-  /// Create timestamp
-  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz()
-
-  @@index([uid, createdAt])
-  @@index([providerItemId, createdAt])
-  @@index([actionResultId])
-  @@index([pilotSessionId])
-  @@map("credit_usages")
-}
-
-model InvitationCode {
-  /// Primary key
-  pk         BigInt   @id @default(autoincrement())
-  /// Invitation code
-  code       String   @unique @map("code")
-  /// Inviter UID
-  inviterUid String   @map("inviter_uid")
-  /// Invitee UID
-  inviteeUid String?  @unique @map("invitee_uid")
-  /// Invitation status: pending, accepted, expired
-  status     String   @default("pending") @map("status")
-  /// Create timestamp
-  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz()
-  /// Update timestamp
-  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
-
-  @@unique([inviterUid, inviteeUid])
-  @@index([inviterUid])
-  @@index([inviteeUid])
-  @@index([status])
-  @@map("invitation_codes")
-}
-
 model StorageUsageMeter {
   /// Primary key
-  pk                 BigInt    @id @default(autoincrement())
+  pk                 Int       @id @default(autoincrement())
   /// Meter ID
   meterId            String    @unique @map("meter_id")
   /// UID
@@ -1430,7 +954,7 @@ model StorageUsageMeter {
   subscriptionId     String?   @map("subscription_id")
   /// File count quota
   fileCountQuota     Int       @default(10) @map("file_count_quota")
-  /// File count used 
+  /// File count used
   fileCountUsed      Int       @default(0) @map("file_count_used")
   /// Object storage quota (in bytes), including resource, canvas and static files
   objectStorageQuota BigInt    @default(0) @map("object_storage_quota")
@@ -1447,13 +971,13 @@ model StorageUsageMeter {
   /// Vector storage size used (in bytes)
   vectorStorageUsed  BigInt    @default(0) @map("vector_storage_used")
   /// Last synced timestamp
-  syncedAt           DateTime? @map("synced_at") @db.Timestamptz()
+  syncedAt           DateTime? @map("synced_at")
   /// Create timestamp
-  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt          DateTime  @default(now()) @map("created_at")
   /// Update timestamp
-  updatedAt          DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt          DateTime  @default(now()) @updatedAt @map("updated_at")
   /// Deletion timestamp
-  deletedAt          DateTime? @map("deleted_at") @db.Timestamptz()
+  deletedAt          DateTime? @map("deleted_at")
 
   @@index([uid, deletedAt])
   @@map("storage_usage_meters")
@@ -1461,7 +985,7 @@ model StorageUsageMeter {
 
 model ModelInfo {
   /// Primary key
-  pk           BigInt   @id @default(autoincrement())
+  pk           Int      @id @default(autoincrement())
   /// Model name
   name         String   @unique @map("name")
   /// Model label
@@ -1481,16 +1005,16 @@ model ModelInfo {
   /// Whether this model is the default model
   isDefault    Boolean  @default(false) @map("is_default")
   /// Create timestamp
-  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt    DateTime @default(now()) @map("created_at")
   /// Update timestamp
-  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@map("model_infos")
 }
 
 model CheckoutSession {
   /// Primary key
-  pk             BigInt   @id @default(autoincrement())
+  pk             Int      @id @default(autoincrement())
   /// Stripe checkout session ID
   sessionId      String   @map("session_id")
   /// UID
@@ -1506,9 +1030,9 @@ model CheckoutSession {
   /// Stripe customer ID
   customerId     String?  @map("customer_id")
   /// Create timestamp
-  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt      DateTime @default(now()) @map("created_at")
   /// Update timestamp
-  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@index([sessionId])
   @@map("checkout_sessions")
@@ -1516,7 +1040,7 @@ model CheckoutSession {
 
 model RefreshToken {
   /// Primary key
-  pk          BigInt   @id @default(autoincrement())
+  pk          Int      @id @default(autoincrement())
   /// Token ID
   jti         String   @unique @map("jti")
   /// User ID
@@ -1526,11 +1050,11 @@ model RefreshToken {
   /// Whether the token has been revoked
   revoked     Boolean  @default(false) @map("revoked")
   /// Expiration timestamp
-  expiresAt   DateTime @map("expires_at") @db.Timestamptz()
+  expiresAt   DateTime @map("expires_at")
   /// Create timestamp
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt   DateTime @default(now()) @map("created_at")
   /// Update timestamp
-  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@index([uid])
   @@map("refresh_tokens")
@@ -1538,7 +1062,7 @@ model RefreshToken {
 
 model Page {
   /// Primary key
-  pk              BigInt    @id @default(autoincrement())
+  pk              Int       @id @default(autoincrement())
   /// Page ID
   pageId          String    @unique @map("page_id")
   /// Owner UID
@@ -1556,11 +1080,11 @@ model Page {
   /// Page status
   status          String    @default("draft") @map("status") // draft, publishing, published
   /// Create timestamp
-  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt       DateTime  @default(now()) @map("created_at")
   /// Update timestamp
-  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at")
   /// Soft delete timestamp
-  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz()
+  deletedAt       DateTime? @map("deleted_at")
 
   /// Associated versions
   versions PageVersion[]
@@ -1572,7 +1096,7 @@ model Page {
 
 model PageNodeRelation {
   /// Primary key
-  pk         BigInt    @id @default(autoincrement())
+  pk         Int       @id @default(autoincrement())
   /// Relation ID
   relationId String    @unique @map("relation_id")
   /// Page ID
@@ -1588,11 +1112,11 @@ model PageNodeRelation {
   /// Node data (storing node metadata)
   nodeData   String    @default("{}") @map("node_data")
   /// Create timestamp
-  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt  DateTime  @default(now()) @map("created_at")
   /// Update timestamp
-  updatedAt  DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt  DateTime  @default(now()) @updatedAt @map("updated_at")
   /// Soft delete timestamp
-  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz()
+  deletedAt  DateTime? @map("deleted_at")
 
   @@index([pageId, deletedAt])
   @@map("page_node_relations")
@@ -1600,7 +1124,7 @@ model PageNodeRelation {
 
 model PageVersion {
   /// Primary key
-  pk                BigInt   @id @default(autoincrement())
+  pk                Int      @id @default(autoincrement())
   /// Version ID
   versionId         String   @unique @map("version_id")
   /// Page ID
@@ -1614,187 +1138,13 @@ model PageVersion {
   /// Cover storage key
   coverStorageKey   String?  @map("cover_storage_key")
   /// Create timestamp
-  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt         DateTime @default(now()) @map("created_at")
 
   /// Page association
   page Page @relation(fields: [pageId], references: [pageId])
 
   @@index([pageId, version])
   @@map("page_versions")
-}
-
-model Toolset {
-  /// Primary key
-  pk            Int       @id @default(autoincrement())
-  /// Toolset ID
-  toolsetId     String    @unique @map("toolset_id")
-  /// Whether the toolset is global
-  isGlobal      Boolean   @default(false) @map("is_global")
-  /// UID
-  uid           String?   @map("uid")
-  /// Toolset name
-  name          String    @map("name")
-  /// Toolset key
-  key           String    @map("key")
-  /// Toolset auth type (credentials, oauth, config_based)
-  authType      String?   @default("config_based") @map("auth_type")
-  /// Toolset auth data
-  authData      String?   @map("auth_data")
-  /// Toolset config (deprecated, use ToolMethod table instead)
-  config        String?   @map("config")
-  /// Whether the toolset is enabled
-  enabled       Boolean   @default(true) @map("enabled")
-  /// Whether the toolset is uninstalled
-  uninstalled   Boolean   @default(false) @map("uninstalled")
-  /// Toolset credit billing
-  creditBilling String?   @map("credit_billing")
-  /// Create timestamp
-  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz()
-  /// Update timestamp
-  updatedAt     DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
-  /// Deletion timestamp
-  deletedAt     DateTime? @map("deleted_at") @db.Timestamptz()
-
-  @@index([uid, isGlobal, deletedAt])
-  @@index([key, enabled])
-  @@map("toolsets")
-}
-
-model ToolMethod {
-  /// Primary key
-  pk             Int       @id @default(autoincrement())
-  /// Toolset inventory key (foreign key to ToolsetInventory)
-  inventoryKey   String    @map("inventory_key")
-  /// Version ID (for version control)
-  versionId      Int       @default(1) @map("version_id")
-  /// Method name (unique within toolset version)
-  name           String    @map("name")
-  /// Method description (for LLM understanding)
-  description    String    @map("description")
-  /// API endpoint full URL
-  endpoint       String    @map("endpoint")
-  /// HTTP method (GET, POST, PUT, DELETE, PATCH)
-  httpMethod     String    @default("POST") @map("http_method")
-  /// Request schema (JSON string)
-  requestSchema  String    @map("request_schema") @db.Text
-  /// Response schema (JSON string)
-  responseSchema String    @map("response_schema") @db.Text
-  /// Adapter type (http, sdk)
-  adapterType    String    @default("http") @map("adapter_type")
-  /// Adapter config (JSON string, optional SDK-specific config)
-  adapterConfig  String?   @map("adapter_config") @db.Text
-  /// Whether the method is enabled
-  enabled        Boolean   @default(true) @map("enabled")
-  /// Create timestamp
-  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz()
-  /// Update timestamp
-  updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
-  /// Deletion timestamp (soft delete)
-  deletedAt      DateTime? @map("deleted_at") @db.Timestamptz()
-
-  @@unique([inventoryKey, name, versionId])
-  @@index([versionId])
-  @@map("tool_methods")
-}
-
-model ToolsetInventory {
-  /// Primary key
-  pk              Int       @id @default(autoincrement())
-  /// Toolset key (unique identifier, e.g., 'firecrawl', 'calculator')
-  key             String    @unique @map("key")
-  /// Toolset name (human-readable name, e.g., 'Firecrawl', 'Calculator')
-  name            String    @map("name")
-  /// Toolset domain (for displaying favicon, e.g., 'firecrawl.dev')
-  domain          String?   @map("domain")
-  /// Toolset label dictionary (display name in JSON format: {"en": "Firecrawl", "zh": "Firecrawl"})
-  labelDict       String    @map("label_dict") @db.Text
-  /// Toolset description dictionary (description in JSON format: {"en": "...", "zh": "..."})
-  descriptionDict String    @map("description_dict") @db.Text
-  /// API Key for authentication (optional)
-  apiKey          String?   @map("api_key") @db.Text
-  /// Toolset type ('regular', 'builtin', 'oauth')
-  type            String    @default("regular") @map("type")
-  /// Adapter type ('http', 'sdk')
-  adapterType     String    @default("http") @map("adapter_type")
-  /// Whether the toolset is enabled in inventory
-  enabled         Boolean   @default(true) @map("enabled")
-  /// Credit billing info (in JSON format)
-  creditBilling   String?   @map("credit_billing") @db.Text
-  /// Create timestamp
-  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
-  /// Update timestamp
-  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
-  /// Deletion timestamp (soft delete)
-  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz()
-
-  @@index([key])
-  @@map("toolset_inventory")
-}
-
-model ComposioConnection {
-  /// Primary key
-  pk                 BigInt    @id @default(autoincrement())
-  /// User ID (Refly)
-  uid                String    @map("uid")
-  /// Integration ID (e.g., 'gmail', 'slack', 'github')
-  integrationId      String    @map("integration_id")
-  /// Connected Account ID (from Composio)
-  connectedAccountId String    @map("connected_account_id")
-  /// Connection status
-  status             String    @default("active") @map("status")
-  /// Integration metadata (JSON)
-  metadata           String?   @map("metadata")
-  /// Token expiration timestamp
-  expiresAt          DateTime? @map("expires_at") @db.Timestamptz()
-  /// Create timestamp
-  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz()
-  /// Update timestamp
-  updatedAt          DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
-  /// Soft delete timestamp
-  deletedAt          DateTime? @map("deleted_at") @db.Timestamptz()
-
-  @@unique([uid, integrationId])
-  @@index([status])
-  @@map("composio_connections")
-}
-
-model ToolCallResult {
-  /// Primary key
-  pk        Int     @id @default(autoincrement())
-  /// Result ID
-  resultId  String  @map("result_id")
-  /// Result version
-  version   Int     @default(0) @map("version")
-  /// Call ID
-  callId    String  @unique @map("call_id")
-  /// UID
-  uid       String  @map("uid")
-  /// Toolset ID
-  toolsetId String  @map("toolset_id")
-  /// Tool name
-  toolName  String  @map("tool_name")
-  /// Step name
-  stepName  String? @map("step_name")
-  /// Input data
-  input     String  @map("input")
-  /// Output data
-  output    String  @map("output")
-
-  /// Status: enum
-  status    String    @default("executing") @map("status")
-  /// Error message
-  error     String?   @map("error")
-  /// Create timestamp
-  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz()
-  /// Update timestamp
-  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
-  /// Deletion timestamp
-  deletedAt DateTime? @map("deleted_at") @db.Timestamptz()
-
-  @@index([resultId, version])
-  @@index([toolsetId, deletedAt])
-  @@index([toolName, deletedAt])
-  @@map("tool_call_results")
 }
 
 model McpServer {
@@ -1825,11 +1175,11 @@ model McpServer {
   /// Whether the server is enabled
   enabled   Boolean   @default(true) @map("enabled")
   /// Create timestamp
-  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt DateTime  @default(now()) @map("created_at")
   /// Update timestamp
-  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at")
   /// Deletion timestamp
-  deletedAt DateTime? @map("deleted_at") @db.Timestamptz()
+  deletedAt DateTime? @map("deleted_at")
 
   @@unique([uid, name])
   @@index([uid, deletedAt])
@@ -1837,43 +1187,37 @@ model McpServer {
   @@map("mcp_servers")
 }
 
-/// Variable extraction history for workflow 3.0
-model VariableExtractionHistory {
+model CreditUsage {
   /// Primary key
-  pk                   BigInt    @id @default(autoincrement())
-  /// Session ID (required for candidate mode, optional for direct mode)
-  sessionId            String?   @unique @map("session_id")
-  /// Canvas ID
-  canvasId             String    @map("canvas_id")
-  /// User ID
-  uid                  String    @map("uid")
-  /// Trigger type: agent | askAI_direct | askAI_candidate
-  triggerType          String    @map("trigger_type")
-  /// Extraction mode: direct | candidate
-  extractionMode       String    @map("extraction_mode")
-  /// Original user input prompt
-  originalPrompt       String    @map("original_prompt")
-  /// Processed prompt template
-  processedPrompt      String?   @map("processed_prompt")
-  /// Extracted variables (JSON array)
-  extractedVariables   String    @map("extracted_variables")
-  /// Reused variables information (JSON array)
-  reusedVariables      String    @default("[]") @map("reused_variables")
-  /// LLM extraction confidence (0.00-1.00)
-  extractionConfidence Decimal?  @map("extraction_confidence") @db.Decimal(3, 2)
-  /// LLM model used
-  llmModel             String?   @map("llm_model")
-  /// Status: pending(candidate) | applied(already applied) | expired(expired)
-  status               String    @default("pending") @map("status")
-  /// Applied timestamp (when candidate mode converts to direct mode)
-  appliedAt            DateTime? @map("applied_at") @db.Timestamptz()
+  pk                Int      @id @default(autoincrement())
+  /// Usage record ID
+  usageId           String   @unique @map("usage_id")
+  /// User UID
+  uid               String   @map("uid")
+  /// Used credits amount
+  amount            Int      @map("amount")
+  /// Provider item ID that consumed the credits
+  providerItemId    String?  @map("provider_item_id")
+  /// Model name used
+  modelName         String?  @map("model_name")
+  /// Usage type (model_call, media_generation, etc.)
+  usageType         String   @default("model_call") @map("usage_type")
+  /// Related action result ID (if applicable)
+  actionResultId    String?  @map("action_result_id")
+  /// Related pilot session ID (if applicable)
+  pilotSessionId    String?  @map("pilot_session_id")
+  /// Usage description
+  description       String?  @map("description")
+  /// Model usage details for skill execution (JSON array of model usage)
+  modelUsageDetails String?  @map("model_usage_details")
   /// Create timestamp
-  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt         DateTime @default(now()) @map("created_at")
   /// Update timestamp
-  updatedAt            DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at")
 
-  @@index([canvasId, uid, createdAt])
-  @@index([triggerType, extractionMode])
-  @@index([extractionConfidence])
-  @@map("variable_extraction_history")
+  @@index([uid, createdAt])
+  @@index([providerItemId, createdAt])
+  @@index([actionResultId])
+  @@index([pilotSessionId])
+  @@map("credit_usages")
 }
